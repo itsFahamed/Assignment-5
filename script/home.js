@@ -57,3 +57,26 @@ const STATUS_THEME = {
 		iconSrc: 'assets/Aperture.png',
 	},
 };
+
+const DETAIL_STATUS_CLASSES = {
+    open: 'px-3 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full',
+    closed: 'px-3 py-1 text-xs font-semibold text-purple-700 bg-purple-100 rounded-full',
+};
+
+const DETAIL_PRIORITY_CLASSES = {
+    high: 'inline-block px-4 py-1 text-xs font-bold text-white bg-red-500 rounded-full uppercase',
+    medium: 'inline-block px-4 py-1 text-xs font-bold text-white bg-yellow-500 rounded-full uppercase',
+    default: 'inline-block px-4 py-1 text-xs font-bold text-white bg-gray-500 rounded-full uppercase',
+};
+
+const TAB_CONFIG = {
+    tabAll: { button: DOM.tabs.all, section: DOM.sections.all },
+    tabOpen: { button: DOM.tabs.open, section: DOM.sections.open },
+    tabClosed: { button: DOM.tabs.closed, section: DOM.sections.closed },
+};
+
+function fetchJson(url) {
+    return fetch(url).then(function (response) {
+        return response.json();
+    });
+}

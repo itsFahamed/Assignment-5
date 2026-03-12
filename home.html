@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="assets/github-logo.png" type="image/png" />
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="tailwind.config.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Geist', sans-serif;
+        }
+        .main-content {
+            max-width: 1100px;
+        }
+    </style>
+    <title>GitHub Issues Tracker</title>
+</head>
+
+<body class="min-h-screen bg-gray-100">
+
+    <!-- Navbar -->
+    <nav class="bg-white border-b border-gray-200 px-6 py-3 flex items-center gap-4">
+
+        <!-- Brand -->
+        <div class="flex items-center gap-2 flex-shrink-0">
+            <div class="bg-gray-900 rounded-full w-8 h-8 flex items-center justify-center">
+                <img src="assets/github-logo.png" alt="GitHub Logo" class="w-5 h-5 invert" />
+            </div>
+            <span class="font-bold text-gray-900 text-base">GitHub Issues Tracker</span>
+        </div>
+
+        <!-- Search -->
+        <div class="flex-1 max-w-sm ml-auto">
+            <div class="relative">
+                <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+                    fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+                    aria-hidden="true">
+                    <circle cx="11" cy="11" r="8" />
+                    <path d="m21 21-4.35-4.35" />
+                </svg>
+                <input
+                    id="issueSearchBox"
+                    type="search"
+                    placeholder="Search issues..."
+                    aria-label="Search issues"
+                    class="w-full pl-9 pr-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-400 bg-white"
+                />
+            </div>
+        </div>
+
+        <!-- New Issue -->
+        <button
+            type="button"
+            aria-label="Create new issue"
+            class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-colors"
+        >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
+                viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 5v14M5 12h14" />
+            </svg>
+            New Issue
+        </button>
+
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content mx-auto mt-8 px-4">
+
+        <!-- Tab Bar -->
+        <div id="tabContainer" role="tablist" class="flex items-center gap-3 mb-4">
+            <button
+                id="tabAll"
+                type="button"
+                role="tab"
+                aria-selected="true"
+                aria-controls="allIssuesSection"
+                onclick="switchTab('tabAll')"
+                class="btn btn-primary btn-sm"
+            >All</button>
+            <button
+                id="tabOpen"
+                type="button"
+                role="tab"
+                aria-selected="false"
+                aria-controls="openIssuesSection"
+                onclick="switchTab('tabOpen')"
+                class="btn btn-outline btn-sm"
+            >Open</button>
+            <button
+                id="tabClosed"
+                type="button"
+                role="tab"
+                aria-selected="false"
+                aria-controls="closedIssuesSection"
+                onclick="switchTab('tabClosed')"
+                class="btn btn-outline btn-sm"
+            >Closed</button>
+        </div>
+
+        <!-- Search Results Section (hidden by default) -->
+        <div id="searchResultsSection" style="display: none;">
+            <div class="bg-white rounded-xl border border-gray-200 px-5 py-4 flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <svg class="w-6 h-6 text-indigo-500" fill="none" stroke="currentColor"
+                        stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="m21 21-4.35-4.35" />
+                    </svg>
+                    <div>
+                        <p id="searchResultsCount" class="font-bold text-gray-900 text-base">Searching...</p>
+                        <p class="text-sm text-gray-500">Search results</p>
+                    </div>
+                </div>
+            </div>
+            <div id="searchResultsGrid" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+        </div>
+
+        <!-- All Issues Section -->
+        <div id="allIssuesSection" role="tabpanel" aria-labelledby="tabAll">
+            <div class="bg-white rounded-xl border border-gray-200 px-5 py-4 flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <img src="assets/Aperture.png" alt="Issues Icon" class="w-9 h-9" />
+                    <div>
+                        <p id="allIssueTotal" class="font-bold text-gray-900 text-base">Loading...</p>
+                        <p class="text-sm text-gray-500">Track and manage your project issues</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4 text-sm text-gray-600">
+                    <span class="flex items-center gap-1">
+                        <span class="w-2.5 h-2.5 rounded-full bg-green-500 inline-block"></span> Open
+                    </span>
+                    <span class="flex items-center gap-1">
+                        <span class="w-2.5 h-2.5 rounded-full bg-purple-500 inline-block"></span> Closed
+                    </span>
+                </div>
+            </div>
+            <div id="allIssuesGrid" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div id="allSpinner" class="col-span-full flex flex-col items-center justify-center py-16 gap-3">
+                    <span class="loading loading-spinner loading-lg text-indigo-500"></span>
+                    <p class="text-gray-500 text-sm">Loading issues...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Open Issues Section -->
+        <div id="openIssuesSection" role="tabpanel" aria-labelledby="tabOpen" style="display: none;">
+            <div class="bg-white rounded-xl border border-gray-200 px-5 py-4 flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <img src="assets/Aperture.png" alt="Issues Icon" class="w-9 h-9" />
+                    <div>
+                        <p id="openIssueTotal" class="font-bold text-gray-900 text-base">Loading...</p>
+                        <p class="text-sm text-gray-500">Track and manage your project issues</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4 text-sm text-gray-600">
+                    <span class="flex items-center gap-1">
+                        <span class="w-2.5 h-2.5 rounded-full bg-green-500 inline-block"></span> Open
+                    </span>
+                    <span class="flex items-center gap-1">
+                        <span class="w-2.5 h-2.5 rounded-full bg-purple-500 inline-block"></span> Closed
+                    </span>
+                </div>
+            </div>
+            <div id="openIssuesGrid" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div id="openSpinner" class="col-span-full flex flex-col items-center justify-center py-16 gap-3">
+                    <span class="loading loading-spinner loading-lg text-indigo-500"></span>
+                    <p class="text-gray-500 text-sm">Loading issues...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Closed Issues Section -->
+        <div id="closedIssuesSection" role="tabpanel" aria-labelledby="tabClosed" style="display: none;">
+            <div class="bg-white rounded-xl border border-gray-200 px-5 py-4 flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <img src="assets/Aperture.png" alt="Issues Icon" class="w-9 h-9" />
+                    <div>
+                        <p id="closedIssueTotal" class="font-bold text-gray-900 text-base">Loading...</p>
+                        <p class="text-sm text-gray-500">Track and manage your project issues</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4 text-sm text-gray-600">
+                    <span class="flex items-center gap-1">
+                        <span class="w-2.5 h-2.5 rounded-full bg-green-500 inline-block"></span> Open
+                    </span>
+                    <span class="flex items-center gap-1">
+                        <span class="w-2.5 h-2.5 rounded-full bg-purple-500 inline-block"></span> Closed
+                    </span>
+                </div>
+            </div>
+            <div id="closedIssuesGrid" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div id="closedSpinner" class="col-span-full flex flex-col items-center justify-center py-16 gap-3">
+                    <span class="loading loading-spinner loading-lg text-indigo-500"></span>
+                    <p class="text-gray-500 text-sm">Loading issues...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Issue Detail Modal -->
+        <dialog id="issueDetailModal" class="modal">
+            <div class="modal-box max-w-xl p-0 bg-white rounded-2xl overflow-hidden">
+
+                <!-- Modal Header -->
+                <div class="p-6 pb-4">
+                    <h3 id="detailTitle" class="text-xl font-bold text-gray-900 mb-3">Issue Title</h3>
+                    <div class="flex items-center gap-2 mb-4 text-sm text-gray-600">
+                        <span id="detailStatus" class="px-3 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">Opened</span>
+                        <span aria-hidden="true">•</span>
+                        <span>Opened by <span id="detailAuthor" class="text-gray-700">Unknown</span></span>
+                        <span aria-hidden="true">•</span>
+                        <span id="detailDate">--/--/----</span>
+                    </div>
+                    <div id="detailLabels" class="flex flex-wrap gap-2 mb-5"></div>
+                    <p id="detailDescription" class="text-base text-gray-600 leading-relaxed">
+                        Issue description will appear here.
+                    </p>
+                </div>
+
+                <!-- Modal Meta -->
+                <div class="bg-gray-50 px-8 py-6">
+                    <div class="flex gap-20 items-center">
+                        <div>
+                            <p class="text-sm text-gray-500 mb-2">Assignee:</p>
+                            <p id="detailAssignee" class="text-base font-bold text-gray-900">Not assigned</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500 mb-2">Priority:</p>
+                            <span id="detailPriority" class="inline-block px-4 py-1 text-xs font-bold text-white bg-red-500 rounded-full uppercase">HIGH</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="flex justify-end px-8 py-4">
+                    <form method="dialog">
+                        <button class="bg-red-500 hover:bg-red-700 text-white px-8 py-2.5 rounded-sm text-base font-semibold transition-colors">
+                            Close
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </dialog>
+
+    </main>
+
+    <script src="script/home.js"></script>
+</body>
+
+</html>

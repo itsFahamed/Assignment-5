@@ -151,3 +151,91 @@ function renderIssueCards(issueList, targetGrid) {
         targetGrid.appendChild(createIssueCard(issue));
     });
 }
+
+function removeSpinners() {
+    Object.values(DOM.spinners).forEach(function (spinner) {
+        if (spinner) {
+            spinner.remove();
+        }
+    });
+}
+
+function setIssueTotals(allCount, openCount, closedCount) {
+    DOM.totals.all.textContent = allCount + ' Issues';
+    DOM.totals.open.textContent = openCount + ' Issues';
+    DOM.totals.closed.textContent = closedCount + ' Issues';
+}
+
+function splitIssuesByStatus(issues) {
+    const openIssues = [];
+    const closedIssues = [];
+
+    issues.forEach(function (issue) {
+        if (issue.status === 'open') {
+            openIssues.push(issue);
+        } else if (issue.status === 'closed') {
+            closedIssues.push(issue);
+        }
+    });
+
+    return {
+        openIssues: openIssues,
+        closedIssues: closedIssues,
+    };
+}
+
+function hideMainSections() {
+    DOM.sections.all.style.display = 'none';
+    DOM.sections.open.style.display = 'none';
+    DOM.sections.closed.style.display = 'none';
+}
+
+function resetTabButtons() {
+    [DOM.tabs.all, DOM.tabs.open, DOM.tabs.closed].forEach(function (button) {
+        button.classList.remove('btn-primary');
+        button.classList.add('btn-outline');
+        button.setAttribute('aria-selected', 'false');
+    });
+}
+
+function switchTab(activeTabId) {
+    resetTabButtons();
+    hideMainSections();
+
+    const activeTab = TAB_CONFIG[activeTabId];
+
+    if (!activeTab) {
+        return;
+    }
+
+    activeTab.button.classList.remove('btn-outline');
+    activeTab.button.classList.add('btn-primary');
+    activeTab.button.setAttribute('aria-selected', 'true');
+    activeTab.section.style.display = 'block';
+}
+
+function showSearchMode() {
+    DOM.tabs.container.style.display = 'none';
+    hideMainSections();
+    DOM.sections.search.style.display = 'block';
+}
+
+function hideSearchMode() {
+    DOM.sections.search.style.display = 'none';
+    DOM.tabs.container.style.display = 'flex';
+    switchTab('tabAll');
+}
+
+function renderEmptySearch(query) {
+    DOM.searchCount.textContent = 'No results for "' + query + '"';
+    DOM.grids.search.innerHTML = '<p class="col-span-full text-center text-gray-500 py-10">No issues found.</p>';
+}
+
+function renderSearchResults(results, query) {
+    DOM.searchCount.textContent =
+        results.length +
+        ' result' +
+        (results.length > 1 ? 's' : '') +
+        ' for "' + query + '"';
+    renderIssueCards(results, DOM.grids.search);
+}

@@ -239,3 +239,55 @@ function renderSearchResults(results, query) {
         ' for "' + query + '"';
     renderIssueCards(results, DOM.grids.search);
 }
+
+function loadAllIssues() {
+    fetchJson(API_BASE_URL + '/issues')
+        .then(function (payload) {
+            const allIssues = payload.data || [];
+            const categorized = splitIssuesByStatus(allIssues);
+
+            removeSpinners();
+            setIssueTotals(allIssues.length, categorized.openIssues.length, categorized.closedIssues.length);
+
+            renderIssueCards(allIssues, DOM.grids.all);
+            renderIssueCards(categorized.openIssues, DOM.grids.open);
+            renderIssueCards(categorized.closedIssues, DOM.grids.closed);
+        })
+        .catch(function () {
+            removeSpinners();
+            DOM.grids.all.innerHTML = '<p class="col-span-full text-center text-red-500 py-10">Failed to load issues. Please try again.</p>';
+        });
+}
+
+let searchDebounceTimer = null;
+
+DOM.searchInput.addEventListener('input', function () {
+    const query = DOM.searchInput.value.trim();
+
+    if (!query) {
+        hideSearchMode();
+        return;
+    }
+
+    showSearchMode();
+    DOM.searchCount.textContent = 'Searching...';
+    DOM.grids.search.innerHTML = '';
+
+    clearTimeout(searchDebounceTimer);
+    searchDebounceTimer = setTimeout(function () {
+        fetchJson(API_BASE_URL + '/issues/search?q=' + encodeURIComponent(query))
+            .then(function (payload) {
+                const results = payload.data || [];
+
+                if (results.length === 0) {
+                    renderEmptySearch(query);
+                    return;
+                }
+
+                renderSearchResults(results, query);
+            })
+            .catch(function () {
+                DOM.searchCount.textContent = 'Search failed. Please try again.';
+            });
+    }, SEARCH_DEBOUNCE_MS);
+});

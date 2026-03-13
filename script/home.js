@@ -291,3 +291,31 @@ DOM.searchInput.addEventListener('input', function () {
             });
     }, SEARCH_DEBOUNCE_MS);
 });
+
+async function openIssueDetail(issueId) {
+    const payload = await fetchJson(API_BASE_URL + '/issue/' + issueId);
+    const issue = payload.data;
+
+    const isOpen = issue.status === 'open';
+    const priority = (issue.priority || 'n/a').toLowerCase();
+
+    const statusEl = document.getElementById('detailStatus');
+    const priorityEl = document.getElementById('detailPriority');
+
+    document.getElementById('detailTitle').textContent = issue.title;
+    document.getElementById('detailAuthor').textContent = issue.author || 'Unknown';
+    document.getElementById('detailDate').textContent = new Date(issue.createdAt).toLocaleDateString('en-GB');
+    document.getElementById('detailDescription').textContent = issue.description || 'No description available.';
+    document.getElementById('detailAssignee').textContent = issue.assignee || issue.author || 'Not assigned';
+    document.getElementById('detailLabels').innerHTML = buildLabelsHTML(issue.labels);
+
+    statusEl.textContent = isOpen ? 'Opened' : 'Closed';
+    statusEl.className = isOpen ? DETAIL_STATUS_CLASSES.open : DETAIL_STATUS_CLASSES.closed;
+
+    priorityEl.textContent = priority.toUpperCase();
+    priorityEl.className = DETAIL_PRIORITY_CLASSES[priority] || DETAIL_PRIORITY_CLASSES.default;
+
+    DOM.detailModal.showModal();
+}
+
+loadAllIssues();

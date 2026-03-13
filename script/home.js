@@ -80,3 +80,74 @@ function fetchJson(url) {
         return response.json();
     });
 }
+
+function buildLabelsHTML(labels) {
+    if (!Array.isArray(labels) || labels.length === 0) {
+        return '';
+    }
+
+    return labels
+        .map(function (label) {
+            const labelKey = String(label).toLowerCase();
+            const theme = LABEL_THEME[labelKey] || LABEL_THEME.default;
+
+            return `<span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold ${theme.text} ${theme.bg} rounded-full">
+                    <span>${theme.icon}</span>${String(label).toUpperCase()}
+                </span>`;
+        })
+        .join('');
+}
+
+function buildPriorityBadge(priorityValue) {
+    const priority = priorityValue || '';
+
+    if (!priority) {
+        return '';
+    }
+
+    const normalizedPriority = priority.toLowerCase();
+
+    if (normalizedPriority === 'high') {
+        return `<span class="px-2 py-1 text-xs font-semibold text-red-700 bg-red-50 rounded">${priority.toUpperCase()}</span>`;
+    }
+
+    if (normalizedPriority === 'medium') {
+        return `<span class="px-2 py-1 text-xs font-semibold text-yellow-700 bg-yellow-50 rounded">${priority.toUpperCase()}</span>`;
+    }
+
+    return `<span class="px-2 py-1 text-xs font-semibold text-gray-600 bg-gray-100 rounded">${priority.toUpperCase()}</span>`;
+}
+
+function createIssueCard(issue) {
+    const statusTheme = STATUS_THEME[issue.status] || STATUS_THEME.default;
+    const priorityBadge = buildPriorityBadge(issue.priority);
+    const labelsHTML = buildLabelsHTML(issue.labels);
+
+    const author = issue.author || 'Unknown';
+    const date = new Date(issue.createdAt).toLocaleDateString();
+
+    const card = document.createElement('div');
+    card.className = `bg-white rounded-lg border border-gray-200 border-t-4 ${statusTheme.borderClass} p-4 shadow-sm`;
+    card.innerHTML = `
+        <div onclick="openIssueDetail(${issue.id})" class="cursor-pointer">
+            <div class="flex items-start justify-between mb-3">
+                <img src="${statusTheme.iconSrc}" alt="Status Icon" class="w-6 h-6" />
+                ${priorityBadge}
+            </div>
+            <h3 class="text-sm font-bold text-gray-900 mb-2">${issue.title}</h3>
+            <p class="text-xs text-gray-600 mb-3 leading-relaxed">${issue.description || 'No description available.'}</p>
+            <div class="flex flex-wrap gap-2 mb-3">${labelsHTML}</div>
+            <div class="text-xs text-gray-500 pt-2 border-t border-gray-100">
+                <p class="mb-0.5">#${issue.id} by ${author}</p>
+                <p>${date}</p>
+            </div>
+        </div>`;
+
+    return card;
+}
+
+function renderIssueCards(issueList, targetGrid) {
+    issueList.forEach(function (issue) {
+        targetGrid.appendChild(createIssueCard(issue));
+    });
+}
